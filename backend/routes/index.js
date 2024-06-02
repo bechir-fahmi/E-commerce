@@ -32,6 +32,11 @@ const {
     deleteOrder
 } = require('../controller/order/OrderController'); 
 
+const { 
+    joinChat, 
+    sendMessage, 
+    assignAdmin 
+} = require('../controller/chat/chatController');
 
 router.post("/signup",userSignUpController)
 router.post("/signin",userSignInController)
@@ -68,7 +73,10 @@ router.put('/orders/:id/accept', acceptOrder);
 router.put('/orders/:id/refuse', refuseOrder);
 router.delete('/orders/:id', deleteOrder);
 
-
+//chat 
+router.post('/chat/join', authToken, joinChat);
+router.post('/chat/message', authToken, sendMessage);
+router.post('/chat/assign', authToken, assignAdmin);
 
 
 module.exports = router
