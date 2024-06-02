@@ -1,3 +1,4 @@
+// controller/chat/chatController.js
 const { Chat, Message } = require('../../models/chatModel');
 
 const joinChat = async (req, res) => {
