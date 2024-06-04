@@ -1,22 +1,44 @@
-// ChatWindow.js
 import React, { useState, useEffect } from 'react';
 import { IoMdSend } from 'react-icons/io';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:8080'); // Replace with your backend URL
 
 const ChatWindow = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [greetingSent, setGreetingSent] = useState(false);
+  const [chatId, setChatId] = useState(null);
 
-  const handleSendMessage = () => {
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+      socket.emit('joinChat', { clientId: 'unique-client-id' }); // Use a unique client ID
+    });
+
+    socket.on('receiveMessage', (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      setMessages([...messages, { text: newMessage, sender: 'user' }]);
+      const messageData = { chatId, message: newMessage, sender: 'user' };
+
+      // Send message to backend via Socket.IO
+      socket.emit('sendMessage', messageData);
+      setMessages([...messages, { ...messageData }]);
       setNewMessage('');
     }
   };
 
   useEffect(() => {
     if (!greetingSent) {
-      setMessages([{ text: 'Hello! How can I help you?', sender: 'bot' }]);
+      setMessages([{ text: 'Hello! How can I help you?', sender: 'bot', id: 'bot-greeting' }]);
       setGreetingSent(true);
     }
   }, [greetingSent]);
@@ -31,7 +53,7 @@ const ChatWindow = ({ onClose }) => {
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`p-2 rounded-lg max-w-xs ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}>
-              {message.text}
+              {message.message || message.text}
             </div>
           </div>
         ))}
