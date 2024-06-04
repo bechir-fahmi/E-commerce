@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IoMdSend } from 'react-icons/io';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:8080'); // Replace with your backend URL
+const socket = io('http://localhost:8080'); 
 
 const ChatWindow = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
@@ -25,6 +25,13 @@ const ChatWindow = ({ onClose }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!greetingSent) {
+      setMessages([{ text: 'Hello! How can I help you?', sender: 'bot', id: 'bot-greeting' }]);
+      setGreetingSent(true);
+    }
+  }, [greetingSent]);
+
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       const messageData = { chatId, message: newMessage, sender: 'user' };
@@ -35,13 +42,6 @@ const ChatWindow = ({ onClose }) => {
       setNewMessage('');
     }
   };
-
-  useEffect(() => {
-    if (!greetingSent) {
-      setMessages([{ text: 'Hello! How can I help you?', sender: 'bot', id: 'bot-greeting' }]);
-      setGreetingSent(true);
-    }
-  }, [greetingSent]);
 
   return (
     <div className="chat-window fixed bottom-0 right-0 transform -translate-x-20 w-80 h-96 bg-white shadow-lg border rounded-lg flex flex-col">
