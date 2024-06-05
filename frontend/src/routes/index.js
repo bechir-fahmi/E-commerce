@@ -13,6 +13,7 @@ import Cart from '../pages/Cart'
 import SearchProduct from '../pages/SearchProduct'
 import AllOrders from'../pages/AllOrders'
 import Adresse from'../pages/Adresse'
+import AllChats from '../pages/AllChats'
 
 
 const router = createBrowserRouter([
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
                     {
                         path : "all-orders",
                         element : <AllOrders/>
+                    },
+                    {
+                        path : "all-chats",
+                        element : <AllChats/>
                     }
                    
                 ]

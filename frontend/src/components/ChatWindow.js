@@ -1,29 +1,55 @@
+import { jwtDecode } from 'jwt-decode';
 import React, { useState, useEffect } from 'react';
 import { IoMdSend } from 'react-icons/io';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:8080'); 
+const socket = io('http://localhost:8080');
+
 
 const ChatWindow = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [greetingSent, setGreetingSent] = useState(false);
   const [chatId, setChatId] = useState(null);
-
+  const token = localStorage.getItem('token');
+    console.log('token=====', token);
+    const idUser = jwtDecode(token)._id
+    console.log('id', idUser);
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to socket server');
-      socket.emit('joinChat', { clientId: 'unique-client-id' }); // Use a unique client ID
-    });
+  
+    if (idUser) {
+      console.log('we will start the socket ');
+      socket.on('connect', () => {
+        console.log('Connected to socket server');
+        socket.emit('joinChat', { clientId: idUser });
+      });
 
-    socket.on('receiveMessage', (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
+      socket.on('receiveMessage', (message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, []
+
+  );
+
+  const joinChat = async (clientId) => {
+    const res = await fetch('http://localhost:8080/api/chat/join', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({ clientId }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      console.log('message saved ☺');
+    }
+  }
 
   useEffect(() => {
     if (!greetingSent) {
@@ -34,7 +60,7 @@ const ChatWindow = ({ onClose }) => {
 
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
-      const messageData = { chatId, message: newMessage, sender: 'user' };
+      const messageData = { chatId, message: newMessage, sender: idUser }; // Corrected sender
 
       // Send message to backend via Socket.IO
       socket.emit('sendMessage', messageData);
@@ -59,9 +85,9 @@ const ChatWindow = ({ onClose }) => {
         ))}
       </div>
       <div className="flex p-2 border-t bg-white">
-        <input 
-          type="text" 
-          className="flex-1 p-2 border rounded-l-lg focus:outline-none focus:ring focus:border-blue-300" 
+        <input
+          type="text"
+          className="flex-1 p-2 border rounded-l-lg focus:outline-none focus:ring focus:border-blue-300"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}

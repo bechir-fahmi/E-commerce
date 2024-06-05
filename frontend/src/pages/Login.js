@@ -42,11 +42,17 @@ const Login = () => {
 
         const dataApi = await dataResponse.json()
 
+
+
         if(dataApi.success){
+        
+            const token = dataApi.data;    
+            localStorage.setItem('token', token)
             toast.success(dataApi.message)
             navigate('/')
             fetchUserDetails()
             fetchUserAddToCart()
+
         }
 
         if(dataApi.error){
