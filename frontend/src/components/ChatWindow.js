@@ -1,10 +1,10 @@
 import { jwtDecode } from 'jwt-decode';
+
 import React, { useState, useEffect } from 'react';
 import { IoMdSend } from 'react-icons/io';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:8080');
-
 
 const ChatWindow = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
@@ -12,13 +12,12 @@ const ChatWindow = ({ onClose }) => {
   const [greetingSent, setGreetingSent] = useState(false);
   const [chatId, setChatId] = useState(null);
   const token = localStorage.getItem('token');
-    console.log('token=====', token);
-    const idUser = jwtDecode(token)._id
-    console.log('id', idUser);
+  const idUser = jwtDecode(token)._id;
+
   useEffect(() => {
-  
     if (idUser) {
-      console.log('we will start the socket ');
+      console.log('Starting socket connection');
+
       socket.on('connect', () => {
         console.log('Connected to socket server');
         socket.emit('joinChat', { clientId: idUser });
@@ -27,44 +26,44 @@ const ChatWindow = ({ onClose }) => {
       socket.on('receiveMessage', (message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       });
-
       return () => {
         socket.disconnect();
       };
     }
-  }, []
-
-  );
-
-  const joinChat = async (clientId) => {
-    const res = await fetch('http://localhost:8080/api/chat/join', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({ clientId }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      console.log('message saved ☺');
-    }
-  }
+  }, [idUser]);
 
   useEffect(() => {
-    if (!greetingSent) {
+    const joinChat = async (clientId) => {
+      const res = await fetch('http://localhost:8080/api/chat/join', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ clientId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setChatId(data.data._id);
+        console.log('Joined chat:', data.data);
+      } else {
+        console.error('Error joining chat:', data.message);
+      }
+    };
+
+    if (!greetingSent && idUser) {
+      joinChat(idUser);
       setMessages([{ text: 'Hello! How can I help you?', sender: 'bot', id: 'bot-greeting' }]);
       setGreetingSent(true);
     }
-  }, [greetingSent]);
+  }, [greetingSent, idUser, token]);  // Added token as a dependency
 
   const handleSendMessage = async () => {
-    if (newMessage.trim()) {
-      const messageData = { chatId, message: newMessage, sender: idUser }; // Corrected sender
-
-      // Send message to backend via Socket.IO
+    if (newMessage.trim() && chatId) {
+      const messageData = { chatId, message: newMessage, sender: idUser };
       socket.emit('sendMessage', messageData);
-      setMessages([...messages, { ...messageData }]);
+      setMessages([...messages, messageData]);
       setNewMessage('');
     }
   };
@@ -77,8 +76,8 @@ const ChatWindow = ({ onClose }) => {
       </div>
       <div className="flex-1 p-2 overflow-y-auto flex flex-col space-y-2 bg-gray-100">
         {messages.map((message, index) => (
-          <div key={index} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`p-2 rounded-lg max-w-xs ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}>
+          <div key={index} className={`flex ${message.sender === idUser ? 'justify-end' : 'justify-start'}`}>
+            <div className={`p-2 rounded-lg max-w-xs ${message.sender === idUser ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}>
               {message.message || message.text}
             </div>
           </div>
