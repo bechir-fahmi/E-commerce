@@ -72,8 +72,8 @@ router.put('/orders/:id/refuse', authToken, refuseOrder);
 router.delete('/orders/:id', authToken, deleteOrder);
 
 // Chat routes
-router.post('/chat/join', authToken, joinChat);
-router.post('/chat/message', authToken, sendMessage);
-router.post('/chat/assign', authToken, assignAdmin);
+router.post('/chat/join', joinChat);
+router.post('/chat/message', sendMessage);
+router.post('/chat/assign', assignAdmin);
 
 module.exports = router;

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import image1 from '../assest/banner/img1.png'
-import image2 from '../assest/banner/img2.png'
-import image3 from '../assest/banner/img3.png'
-import image4 from '../assest/banner/img4.png'
-import image5 from '../assest/banner/img5.png'
+import image1 from '../assest/banner/img1.jpeg'
+import image2 from '../assest/banner/img2.jpeg'
+import image3 from '../assest/banner/img3.jpeg'
+import image4 from '../assest/banner/img4.jpeg'
+import image5 from '../assest/banner/img5.jpeg'
 
 
 import image1Mobile from '../assest/banner/img1_mobile.jpg'

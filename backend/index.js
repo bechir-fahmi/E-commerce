@@ -9,7 +9,7 @@ const socketIo = require('socket.io');
 const { Chat, Message } = require('./models/chatModel');
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server
+const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: process.env.FRONTEND_URL,
@@ -26,17 +26,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api", router);
-
 const PORT = process.env.PORT || 8080;
 
 connectDB().then(() => {
-    server.listen(PORT, () => {
+    server.listen(PORT, () => { 
         console.log("Connected to DB");
         console.log("Server is running on port " + PORT);
     });
 });
-
-// Socket.IO configuration
 io.on('connection', (socket) => {
     console.log('New client connected');
 
@@ -66,6 +63,15 @@ io.on('connection', (socket) => {
             await chat.save();
             io.to(chatId).emit('adminAssigned', { adminId });
         }
+    });
+    socket.on('getAllChats', async ({ clientId }) => {
+        const chats = await Chat.find({ clientId });
+        socket.emit('allChats', chats);
+    });
+
+    socket.on('getUnrepliedChats', async () => {
+        const chats = await Chat.find({ adminId: null });
+        socket.emit('unrepliedChats', chats);
     });
 
     socket.on('disconnect', () => {
