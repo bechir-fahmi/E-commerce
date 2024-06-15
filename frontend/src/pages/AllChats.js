@@ -2,34 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import moment from 'moment';
 import { MdModeEdit } from 'react-icons/md';
-import ChatWindow from '../components/ChatWindow'; // Ajustez le chemin ici
+import io from 'socket.io-client';
+import ChatWindow from '../components/ChatWindow'; 
+
+const socket = io('http://localhost:8080',{withCredentials:true}); 
 
 const AllChats = () => {
     const [allChats, setAllChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
 
-    const fetchAllChats = async () => {
-        try {
-            const response = await fetch('/api/chats', {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            const dataResponse = await response.json();
-
-            if (dataResponse.success) {
-                setAllChats(dataResponse.data);
-            } else {
-                toast.error(dataResponse.message);
-            }
-        } catch (error) {
-            console.error('Error fetching chats:', error);
-            toast.error('Error fetching chats. Please try again later.');
-        }
-    };
-
     useEffect(() => {
-        fetchAllChats();
+        socket.emit('getAllChats');
+
+        socket.on('allChats', (chats) => {
+            setAllChats(chats);
+        });
+
+        return () => {
+            socket.off('allChats');
+        };
     }, []);
 
     const handleAcceptChat = async (chatId) => {
@@ -76,11 +67,12 @@ const AllChats = () => {
 
     const handleChatClick = (chat) => {
         setSelectedChat(chat);
-        // Additional logic to notify other admins or sub-admins can be added here
+      
     };
 
     return (
         <div className="bg-white pb-4 p-4">
+            <h1>All Chats</h1>
             <table className="min-w-full bg-white border border-gray-200">
                 <thead>
                     <tr className="bg-gray-800 text-white">

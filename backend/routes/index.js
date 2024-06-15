@@ -34,7 +34,9 @@ const {
 const {
     joinChat,
     sendMessage,
-    assignAdmin
+    assignAdmin,
+    getAllChats,
+    getUnrepliedChats
 } = require('../controller/chat/chatController');
 
 // User routes
@@ -75,5 +77,7 @@ router.delete('/orders/:id', authToken, deleteOrder);
 router.post('/chat/join', joinChat);
 router.post('/chat/message', sendMessage);
 router.post('/chat/assign', assignAdmin);
+router.post('/chat/getUnrepliedChats', assignAdmin);
+router.post('/chat/getAllChats', assignAdmin);
 
 module.exports = router;

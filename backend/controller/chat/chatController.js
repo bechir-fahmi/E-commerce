@@ -48,8 +48,28 @@ const assignAdmin = async (req, res) => {
     }
 };
 
+const getAllChats = async (req, res) => {
+    try {
+        const chats = await Chat.find({});
+        res.status(200).json({ success: true, data: chats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching all chats', error });
+    }
+};
+
+const getUnrepliedChats = async (req, res) => {
+    try {
+        const chats = await Chat.find({ adminId: null });
+        res.status(200).json({ success: true, data: chats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching unreplied chats', error });
+    }
+};
+
 module.exports = {
     joinChat,
     sendMessage,
-    assignAdmin
+    assignAdmin,
+    getAllChats,
+    getUnrepliedChats
 };

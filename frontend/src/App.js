@@ -1,16 +1,16 @@
-import logo from './logo.png';
-import './App.css';
-import { Outlet } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import { ToastContainer } from 'react-toastify';
+import React, { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useEffect, useState } from 'react';
-import SummaryApi from './common';
-import Context from './context';
+import { Outlet } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUserDetails } from './store/userSlice';
+import Header from './components/Header';
+import Footer from './components/Footer';
 import ChatWindow from './components/ChatWindow';
+import Context from './context';
+import SummaryApi from './common';
+import './App.css';
+import logo from './logo.png';
 
 function App() {
   const dispatch = useDispatch();
@@ -27,6 +27,8 @@ function App() {
 
     if (dataApi.success) {
       dispatch(setUserDetails(dataApi.data));
+    } else {
+      toast.error(dataApi.message);
     }
   };
 
@@ -42,34 +44,27 @@ function App() {
   };
 
   useEffect(() => {
-    /**user Details */
     fetchUserDetails();
-    /**user Details cart product */
     fetchUserAddToCart();
   }, []);
 
   return (
-    <>
-      <Context.Provider value={{
-        fetchUserDetails, // user detail fetch 
-        cartProductCount, // current user add to cart product count,
-        fetchUserAddToCart
-      }}>
-        <ToastContainer 
-          position='top-center'
-        />
-        
-        <Header />
-        <main className='min-h-[calc(100vh-120px)] pt-16'>
-          <Outlet />
-          <button onClick={() => setChatOpen(true)} className="fixed bottom-5 right-5 bg-blue-600 text-white p-2 rounded-lg">
-            Open Chat
-          </button>
-          {chatOpen && <ChatWindow onClose={() => setChatOpen(false)} />}
-        </main>
-        <Footer />
-      </Context.Provider>
-    </>
+    <Context.Provider value={{
+      fetchUserDetails, // user detail fetch 
+      cartProductCount, // current user add to cart product count,
+      fetchUserAddToCart
+    }}>
+      <ToastContainer position='top-center' autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      <Header />
+      <main className='min-h-[calc(100vh-120px)] pt-16'>
+        <Outlet />
+        <button onClick={() => setChatOpen(true)} className="fixed bottom-5 right-5 bg-blue-600 text-white p-2 rounded-lg">
+          Open Chat
+        </button>
+        {chatOpen && <ChatWindow onClose={() => setChatOpen(false)} />}
+      </main>
+      <Footer />
+    </Context.Provider>
   );
 }
 
